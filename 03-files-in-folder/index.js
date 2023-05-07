@@ -1,19 +1,18 @@
 const path = require('path');
 const fs = require('fs');
+const fsPromises = require('fs/promises')
 
-function checkFiles(way) {
-    fs.readdir(way, (err, files) => {
-        if (err) throw err;
-        files.forEach(file => {
-            let fileName = path.basename(file).split('.')[0],
-                fileExt = path.extname(file).split('.')[1];
-            fs.stat(path.join(way, file), (err, stats) => {
-                if (err) throw err;
-                if (fileExt) console.log(`${fileName} - ${fileExt} - ${stats.size * Math.pow(10, -3)}kb`) // If fileExt has no prop, this is not file 
-            })
+async function checkFiles(way) {
+    const files = await fsPromises.readdir(way, { withFileTypes: true });
+    files.filter(el => el.isFile()).forEach(file => {
+        fs.stat(path.join(way, file.name), (err, stats) => {
+            if (err) throw err;
+            let fileName = file.name.split('.')[0],
+                fileExt = path.extname(file.name).split('.')[1],
+                fileSize = `${stats.size * Math.pow(10, -3)}kb`
+            console.log(`${fileName} - ${fileExt} - ${fileSize}`)
         })
     })
-    
 }
-
 checkFiles(path.join(__dirname, 'secret-folder'))
+
