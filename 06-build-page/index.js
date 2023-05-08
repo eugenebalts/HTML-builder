@@ -22,12 +22,29 @@ async function recreateFolder(folder) {
         await fsPromises.mkdir(path.join(__dirname, 'project-dist'), err => {
             if (err) throw err;
         });
-        
-    } catch(err) { //if there is no folder just create it 
+
+    } catch (err) { //if there is no folder just create it 
         await fsPromises.mkdir(path.join(__dirname, 'project-dist'), err => {
             if (err) throw err;
         });
     }
+
+    async function copyAssets(folder) { //TODO: IT WORKS NOT CORRECTLY 
+        await fsPromises.mkdir(path.join(projectDist, folder), {recursive: true}, err => {
+            if (err) return;
+        })
+        const assetsFiles = await fsPromises.readdir(path.join(__dirname, folder), {withFileTypes: true});
+        for (const file of assetsFiles) {
+            if (file.isFile()) {
+                await fsPromises.copyFile(path.join(__dirname, folder, file.name), path.join(projectDist, folder, file.name))
+            }
+            if (file.isDirectory()) {
+                await copyAssets(path.join(folder, file.name))
+            }
+        }
+    }
+
+    await copyAssets('assets')
 }
 
 async function buildWeb() {
@@ -62,5 +79,6 @@ async function buildWeb() {
         })
     })
 }
+
 
 buildWeb()
