@@ -3,6 +3,11 @@ const fs = require('fs');
 const {stdin, stdout} = process;
 
 function writeText(dir) {
+    
+    fs.stat(dir, err => {
+        if (err) fs.createWriteStream(dir, 'utf-8')
+    });
+
     stdout.write('Please, write something here :))\n')
     stdout.on('error', err => {
         if (err) throw err;
@@ -17,7 +22,14 @@ function writeText(dir) {
             }
         )
     });
-    process.on('exit', () => stdout.write('Session is over. Bye!'));
+    process.on('exit', () => {
+        stdout.write('Session is over. Bye!');
+        process.exit()
+    });
+    process.on('SIGINT', () => {
+        stdout.write('Session is over. Bye!');
+        process.exit()
+    });
 }
 
 writeText(path.resolve(__dirname, 'text.txt'))
