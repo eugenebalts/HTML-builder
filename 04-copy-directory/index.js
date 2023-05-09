@@ -25,6 +25,7 @@ async function copyFiles(folder) {
     }
 
     await rmDir(pastedFolder);
+    
     await mkdir(path.join(__dirname, `${folder}-copy`), {recursive: true});
     for (const file of copiedFiles) {
         await copyFile(path.join(copiedFolder, file), path.join(pastedFolder, file));

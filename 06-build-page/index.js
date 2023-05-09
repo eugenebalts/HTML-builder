@@ -9,30 +9,33 @@ const compsFolder = path.join(__dirname, 'components');
 const projectDist = path.join(__dirname, 'project-dist');
 
 async function recreateFolder(folder) {
-    try { // delete and create if there is folder
+    try {
         const folderContent = await fsPromises.readdir(folder, {withFileTypes: true}, err => {
-            if (err) return;
+            if (err) return err;
         });
         for (const file of folderContent) {
             const dirToFile = path.join(folder, file.name)
-            file.isFile() ? await fsPromises.rm(dirToFile) : await recreateFolder(dirToFile)
+            if (file.isDirectory()) {
+                await recreateFolder(dirToFile);
+            }
+            if (file.isFile()) await fsPromises.unlink(dirToFile)
         }
     
         await fsPromises.rmdir(folder)
-        await fsPromises.mkdir(path.join(__dirname, 'project-dist'), err => {
-            if (err) console.log('papap');
-        });
 
-    } catch (err) { //if there is no folder just create it 
-        await fsPromises.mkdir(path.join(__dirname, 'project-dist'), err => {
-            if (err) console.log('palpals s');
-        });
+    } catch (err) {
+        return;
     }
 }
 
 async function buildWeb() {
-    // 2 HTML 
     await recreateFolder(projectDist);
+    // CREATE PROJECT-DIST
+    await fsPromises.mkdir(path.join(__dirname, 'project-dist'), err => {
+        if (err) throw err;
+    });
+
+    // 2 HTML 
         // CREATE FILE HTML
         const indexHtml = fs.createWriteStream(path.join(projectDist, 'index.html'), 'utf-8');
         // READ COMPONENTS
@@ -60,12 +63,12 @@ async function buildWeb() {
         readableStream.on('data', data => {
             writableSteam.write(data)
         })
-    })
+    });
 
-    await copyAssets('assets')
+    await copyAssets('assets');
 }
 
-async function copyAssets(folder) { //TODO: IT WORKS NOT CORRECTLY 
+async function copyAssets(folder) {
     await fsPromises.mkdir(path.join(projectDist, folder), {recursive: true})
     const assetsFiles = await fsPromises.readdir(path.join(__dirname, folder), {withFileTypes: true});
     for (const file of assetsFiles) {
@@ -76,7 +79,6 @@ async function copyAssets(folder) { //TODO: IT WORKS NOT CORRECTLY
             await copyAssets(path.join(folder, file.name))
         }
     }
-    
 }
 
 
