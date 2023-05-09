@@ -13,7 +13,10 @@ function writeText(dir) {
         if (err) throw err;
     });
     stdin.on('data', data => {
-        if (data.toString().trim() === 'exit') process.exit();
+        if (data.toString().trim() === 'exit') {
+            stdout.write('Session is over. Bye!');
+            process.exit();
+        }
         fs.appendFile(
             dir,
             data,
@@ -21,10 +24,6 @@ function writeText(dir) {
                 if (err) throw err
             }
         )
-    });
-    process.on('exit', () => {
-        stdout.write('Session is over. Bye!');
-        process.exit()
     });
     process.on('SIGINT', () => {
         stdout.write('Session is over. Bye!');
