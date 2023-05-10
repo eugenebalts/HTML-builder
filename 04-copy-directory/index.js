@@ -4,8 +4,6 @@ const {copyFile, readdir, mkdir, rm} = require('node:fs/promises');
 
 async function copyFiles(folder) {
 
-    const copiedFolder = `${path.join(__dirname, folder)}`;
-    const pastedFolder = path.join(__dirname, `${folder}-copy`);
     const copiedFiles = await readdir(path.join(__dirname, folder), (err, files) => {
         if (err) throw err;
     });
@@ -16,7 +14,6 @@ async function copyFiles(folder) {
                 if (err) return;
             });
             for (const file of folderContent) {
-                const dirToFile = path.join(folder, file.name)
                 file.isFile() ? await fsPromises.rm(path.join(folder, file.name)) : await recreateFolder(path.join(folder, file.name))
             }
         } catch (err) {
