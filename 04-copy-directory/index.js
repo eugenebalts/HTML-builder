@@ -6,7 +6,7 @@ async function copyFiles(folder) {
 
     const copiedFolder = `${path.join(__dirname, folder)}`;
     const pastedFolder = path.join(__dirname, `${folder}-copy`);
-    const copiedFiles = await readdir(copiedFolder, (err, files) => {
+    const copiedFiles = await readdir(path.join(__dirname, folder), (err, files) => {
         if (err) throw err;
     });
 
@@ -17,18 +17,18 @@ async function copyFiles(folder) {
             });
             for (const file of folderContent) {
                 const dirToFile = path.join(folder, file.name)
-                file.isFile() ? await fsPromises.rm(dirToFile) : await recreateFolder(dirToFile)
+                file.isFile() ? await fsPromises.rm(path.join(folder, file.name)) : await recreateFolder(path.join(folder, file.name))
             }
         } catch (err) {
             return;
         }
     }
 
-    await rmDir(pastedFolder);
+    await rmDir(path.join(__dirname, `${folder}-copy`));
     
     await mkdir(path.join(__dirname, `${folder}-copy`), {recursive: true});
     for (const file of copiedFiles) {
-        await copyFile(path.join(copiedFolder, file), path.join(pastedFolder, file));
+        await copyFile(path.join(path.join(__dirname, folder), file), path.join(path.join(__dirname, `${folder}-copy`), file));
     }
     }
 
